@@ -1,0 +1,76 @@
+table {
+  width: 100%;
+}
+
+tr.example-detail-row {
+  height: 0;
+}
+
+tr.example-element-row:not(.example-expanded-row):hover {
+  background: whitesmoke;
+}
+
+tr.example-element-row:not(.example-expanded-row):active {
+  background: #efefef;
+}
+
+.example-element-row td {
+  border-bottom-width: 0;
+}
+
+.example-element-detail {
+  overflow: hidden;
+  display: flex;
+}
+
+.mat-column-symbol {
+  flex: 0 0 12% !important;
+  width: 12% !important;
+  word-break: break-word;
+}
+
+.mat-column-order-id {
+  flex: 0 0 12% !important;
+  width: 12% !important;
+  word-break: break-word;
+}
+
+.mat-column-side {
+  flex: 0 0 10% !important;
+  width: 10% !important;
+  word-break: break-word;
+}
+
+.mat-column-size {
+  flex: 0 0 10% !important;
+  width: 10% !important;
+  word-break: break-word;
+}
+
+.mat-column-open-time {
+  flex: 0 0 12% !important;
+  width: 12% !important;
+  word-break: break-word;
+}
+
+.mat-column-open-price {
+  flex: 0 0 14% !important;
+  width: 14% !important;
+  word-break: break-word;
+}
+
+.mat-column-swap {
+  flex: 0 0 12% !important;
+  width: 12% !important;
+  word-break: break-word;
+}
+
+.mat-column-profit {
+  flex: 0 0 12% !important;
+  width: 12% !important;
+  word-break: break-word;
+}
+
+.mat-column-expandedDetail {
+  padding: 0;
+}

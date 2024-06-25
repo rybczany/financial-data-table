@@ -1,0 +1,1 @@
+const API_URL = 'https://geeksoft.pl/assets/order-data.json'
