@@ -2,7 +2,7 @@
     @for (mainColumn of mainColumns; track mainColumn) {
     <ng-container matColumnDef="{{mainColumn.columnDef}}">
         <th mat-header-cell *matHeaderCellDef> {{mainColumn.header}} </th>
-        <td mat-cell *matCellDef="let row"> {{mainColumn.cell(row)}} </td>
+        <td mat-cell *matCellDef="let row"><span>{{mainColumn.cell(row)}}</span></td>
     </ng-container>
     }
     <ng-container matColumnDef="expandedDetail">

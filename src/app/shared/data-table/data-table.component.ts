@@ -12,7 +12,6 @@ import {
 import { FinancialData } from './financial-data';
 import { DataTableService } from '../../services/api/data-table.service';
 import { groupBy, map, mergeMap, tap, toArray, zip } from 'rxjs/operators';
-import { of } from 'rxjs';
 
 //---------------------------------------------------------------------------------
 
@@ -45,6 +44,11 @@ export class DataTableComponent implements OnInit {
       cell: (element: FinancialData) => `${element.symbol}`,
     },
     {
+      columnDef: 'symbol details length',
+      header: '',
+      cell: (element: any) => `${element.details.length}`,
+    },
+    {
       columnDef: 'order id',
       header: 'Order ID',
       cell: () => ``,
@@ -67,7 +71,10 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'open price',
       header: 'Open Price',
-      cell: (element: FinancialData) => `${element.openPrice}`,
+      cell: (element: any) => {
+        const averageOpenPrice = this.calculateSum(element, 'open price') / element.details.length;
+        return averageOpenPrice.toFixed(4);
+      },
     },
     {
       columnDef: 'swap',
@@ -78,13 +85,21 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'profit',
       header: 'Profit',
-      cell: () => `profit`,
+      cell: (element: any) => {
+        const averageProfit = this.calculateSum(element, 'profit') / element.details.length;
+        return averageProfit.toFixed(4);
+      },
     },
   ];
   subColumns = [
     {
       columnDef: 'symbol',
       header: 'Symbol',
+      cell: () => ``,
+    },
+    {
+      columnDef: 'symbol details length',
+      header: '',
       cell: () => ``,
     },
     {
@@ -121,7 +136,15 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'profit',
       header: 'Profit',
-      cell: () => `profit`,
+      cell: (element: FinancialData) => {
+        const profit = this.calculateProfit(
+          element.closePrice,
+          element.openPrice,
+          element.symbol,
+          element.side
+        );
+        return profit.toFixed(4);
+      },
     },
   ];
   displayedMainColumns = this.mainColumns.map((c) => c.columnDef);
@@ -133,37 +156,92 @@ export class DataTableComponent implements OnInit {
   swap: number = 0;
 
   ngOnInit() {
-    this.dataTableService.getFinancialData().pipe(
-      map((res) => [...res.data]),
-      mergeMap(res => res),
-      tap(res => console.log(2,res)),
-      groupBy(res => res.symbol),
-      tap(res => console.log(3,res)),
-      mergeMap(group => {
-        return group.pipe(toArray())
-      }),
-      tap(res => {
-        console.log(4,res)
-        let newObj;
-        let size: number = 0;
-        let openPrice: number = 0;
-        let swap: number = 0;
-        res.forEach(it => {
-          newObj = {
-            symbol: this.symbol = it.symbol,
-            size: size += it.size,
-            openPrice: openPrice += it.openPrice,
-            swap: swap += it.swap,
-            details: res
-          }
+    this.dataTableService
+      .getFinancialData()
+      .pipe(
+        map((res) => [...res.data]),
+        mergeMap((res) => res),
+        groupBy((res) => res.symbol),
+        mergeMap((group) => {
+          return group.pipe(toArray());
+        }),
+        tap((res) => {
+          let newObj;
+          let size: number = 0;
+          let swap: number = 0;
+          res.forEach((it) => {
+            newObj = {
+              symbol: (this.symbol = it.symbol),
+              size: (size += it.size),
+              swap: (swap += it.swap),
+              details: res,
+            };
+          });
+          this.newArr.push(newObj);
+          this.mainDataSource = this.newArr;
+          this.subDataSource = newObj!.details;
+          
         })
-        this.newArr.push(newObj);
-        this.mainDataSource = this.newArr;
-        this.subDataSource = newObj!.details;
-        console.log("subDataSource",this.subDataSource)
-        console.log("mainDataSource",this.mainDataSource)
-      })
-    )
-    .subscribe();
+      )
+      .subscribe();
+  }
+
+  calculateMultiplier(symbol: string): number {
+    let multiplier: number = 0;
+    switch (symbol) {
+      case 'BTCUSD':
+        multiplier = 2;
+        break;
+      case 'ETHUSD':
+        multiplier = 3;
+        break;
+      default:
+        multiplier = 1;
+    }
+    return multiplier;
+  }
+
+  calculateSideMultiplier(side: string): number {
+    let sideMultiplier: number = 0;
+    switch (side) {
+      case 'BUY':
+        sideMultiplier = 1;
+        break;
+      default:
+        sideMultiplier = -1;
+    }
+    return sideMultiplier;
+  }
+
+  calculateProfit(
+    closePrice: number,
+    openPrice: number,
+    symbol: string,
+    side: string
+  ): number {
+    const calculatedProfit =
+      ((closePrice - openPrice) *
+        this.calculateMultiplier(symbol) *
+        this.calculateSideMultiplier(side)) /
+      100;
+    return calculatedProfit;
+  }
+
+  calculateSum(element: any, title: string): number {
+    let sum: number = 0;
+    element.details.forEach((detail: FinancialData) => {
+      if (title === 'profit') {
+        const calculatedProfit = this.calculateProfit(
+          detail.closePrice,
+          detail.openPrice,
+          detail.symbol,
+          detail.side
+        );
+        sum += calculatedProfit;
+      } else {
+        sum += detail.openPrice;
+      }
+    });
+    return sum;
   }
 }
