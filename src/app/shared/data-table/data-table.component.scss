@@ -31,9 +31,19 @@ tr.example-element-row:not(.example-expanded-row):active {
 .mat-column-open-price,
 .mat-column-swap,
 .mat-column-profit {
-  flex: 0 0 12% !important;
-  width: 12% !important;
+  flex: 0 0 10% !important;
+  width: 10% !important;
   word-break: break-word;
+}
+
+.mat-column-expand {
+  flex: 0 0 6% !important;
+  width: 6% !important;
+}
+
+.mat-column-open-time {
+  flex: 0 0 15% !important;
+  width: 15% !important;
 }
 
 .mat-column-symbol {

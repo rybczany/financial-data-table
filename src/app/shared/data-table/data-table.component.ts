@@ -12,6 +12,7 @@ import {
 import { FinancialData } from './financial-data';
 import { DataTableService } from '../../services/api/data-table.service';
 import { groupBy, map, mergeMap, tap, toArray, zip } from 'rxjs/operators';
+import { formatDate } from "@angular/common";
 
 //---------------------------------------------------------------------------------
 
@@ -38,6 +39,11 @@ export class DataTableComponent implements OnInit {
   subDataSource: FinancialData[] = [];
   expandedElement: FinancialData | null | undefined;
   mainColumns = [
+    {
+      columnDef: 'expand',
+      header: '',
+      cell: () => ``,
+    },
     {
       columnDef: 'symbol',
       header: 'Symbol',
@@ -93,6 +99,11 @@ export class DataTableComponent implements OnInit {
   ];
   subColumns = [
     {
+      columnDef: 'expand',
+      header: '',
+      cell: () => ``,
+    },
+    {
       columnDef: 'symbol',
       header: 'Symbol',
       cell: () => ``,
@@ -120,7 +131,10 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'open time',
       header: 'Open Time',
-      cell: (element: FinancialData) => `${element.openTime}`,
+      cell: (element: FinancialData) => {
+        const formattedDate = formatDate(element.openTime, 'dd.MM.yyyy hh:mm:ss', 'pl_PL');
+        return formattedDate
+      },
     },
     {
       columnDef: 'open price',
