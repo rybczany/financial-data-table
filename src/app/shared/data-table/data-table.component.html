@@ -1,4 +1,4 @@
-<table mat-table [dataSource]="mainDataSource" multiTemplateDataRows class="mat-elevation-z8">
+<table #mainTable mat-table [dataSource]="mainDataSource" multiTemplateDataRows class="mat-elevation-z8">
     @for (mainColumn of mainColumns; track mainColumn) {
     <ng-container matColumnDef="{{mainColumn.columnDef}}">
         <th mat-header-cell *matHeaderCellDef> {{mainColumn.header}} </th>
@@ -13,8 +13,12 @@
                     <mat-icon>keyboard_arrow_down</mat-icon>
                     }
                 </button>
+                } @else if (mainColumn.columnDef === 'remove') {
+                <button mat-icon-button aria-label="remove row" (click)="removeMainDataRow(row.id); $event.stopPropagation()">
+                    <mat-icon>playlist_remove</mat-icon>
+                </button>
                 } @else {
-                    {{mainColumn.cell(row)}}
+                {{mainColumn.cell(row)}}
                 }
             </span>
         </td>
@@ -23,11 +27,19 @@
     <ng-container matColumnDef="expandedDetail">
         <td mat-cell *matCellDef="let element" [attr.colspan]="displayedSubColumns.length">
             <div class="example-element-detail" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-                <table mat-table [dataSource]="element.details" class="mat-elevation-z8">
+                <table #subTables mat-table [dataSource]="element.details" class="mat-elevation-z8">
                     @for (subColumn of subColumns; track subColumn) {
                     <ng-container matColumnDef="{{subColumn.columnDef}}">
                         <th mat-header-cell *matHeaderCellDef> {{subColumn.header}} </th>
-                        <td mat-cell *matCellDef="let row"> {{subColumn.cell(row)}} </td>
+                        <td mat-cell *matCellDef="let row">
+                            @if (subColumn.columnDef === 'remove') {
+                                <button mat-icon-button aria-label="remove row" (click)="removeSubDataRow(row.id, element, row); $event.stopPropagation()">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            } @else {
+                                {{subColumn.cell(row)}} 
+                            }
+                        </td>
                     </ng-container>
                     }
                     <tr mat-row *matRowDef="let row; columns: displayedSubColumns;"></tr>

@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
+import { MatTable, MatTableModule } from '@angular/material/table';
 import {
   animate,
   state,
@@ -35,7 +35,9 @@ import { formatDate } from "@angular/common";
 })
 export class DataTableComponent implements OnInit {
   constructor(private dataTableService: DataTableService) {}
-  mainDataSource: FinancialData[] = [];
+  @ViewChild('mainTable') mainTable: MatTable<FinancialData> | undefined;
+  @ViewChildren('subTables') subTables: QueryList<MatTable<FinancialData>> | undefined;
+  mainDataSource: any[] = [];
   subDataSource: FinancialData[] = [];
   expandedElement: FinancialData | null | undefined;
   mainColumns = [
@@ -87,7 +89,6 @@ export class DataTableComponent implements OnInit {
       header: 'Swap',
       cell: (element: FinancialData) => `${element.swap}`,
     },
-
     {
       columnDef: 'profit',
       header: 'Profit',
@@ -95,6 +96,11 @@ export class DataTableComponent implements OnInit {
         const averageProfit = this.calculateSum(element, 'profit') / element.details.length;
         return averageProfit.toFixed(4);
       },
+    },
+    {
+      columnDef: 'remove',
+      header: '',
+      cell: () => ``,
     },
   ];
   subColumns = [
@@ -160,6 +166,11 @@ export class DataTableComponent implements OnInit {
         return profit.toFixed(4);
       },
     },
+    {
+      columnDef: 'remove',
+      header: '',
+      cell: () => ``,
+    },
   ];
   displayedMainColumns = this.mainColumns.map((c) => c.columnDef);
   displayedSubColumns = this.subColumns.map((c) => c.columnDef);
@@ -181,10 +192,12 @@ export class DataTableComponent implements OnInit {
         }),
         tap((res) => {
           let newObj;
+          let id: number = 0;
           let size: number = 0;
           let swap: number = 0;
           res.forEach((it) => {
             newObj = {
+              id: id++,
               symbol: (this.symbol = it.symbol),
               size: (size += it.size),
               swap: (swap += it.swap),
@@ -257,5 +270,18 @@ export class DataTableComponent implements OnInit {
       }
     });
     return sum;
+  }
+
+  removeMainDataRow(id: number) {
+    this.mainDataSource.splice(this.mainDataSource.map(item => item.id).indexOf(id), 1);
+    this.mainTable!.renderRows();
+  }
+
+  removeSubDataRow(id: number, element: any, row: any) {
+    element.details.splice(element.details.map((item: any) => item.id).indexOf(id), 1);
+    this.subTables?.forEach(table => table.renderRows());
+    if (!element.details.length) {
+      this.removeMainDataRow(element.id)
+    }
   }
 }
