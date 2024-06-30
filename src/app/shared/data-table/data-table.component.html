@@ -14,7 +14,7 @@
                     }
                 </button>
                 } @else if (mainColumn.columnDef === 'remove') {
-                <button mat-icon-button aria-label="remove row" (click)="removeMainDataRow(row.id); $event.stopPropagation()">
+                <button mat-icon-button aria-label="remove row" (click)="removeMainDataRow(row); $event.stopPropagation()">
                     <mat-icon>playlist_remove</mat-icon>
                 </button>
                 } @else {

@@ -1,4 +1,10 @@
-import { Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTable, MatTableModule } from '@angular/material/table';
@@ -11,8 +17,9 @@ import {
 } from '@angular/animations';
 import { FinancialData } from './financial-data';
 import { DataTableService } from '../../services/api/data-table.service';
-import { groupBy, map, mergeMap, tap, toArray, zip } from 'rxjs/operators';
-import { formatDate } from "@angular/common";
+import { groupBy, map, mergeMap, tap, toArray } from 'rxjs/operators';
+import { formatDate } from '@angular/common';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 //---------------------------------------------------------------------------------
 
@@ -34,9 +41,14 @@ import { formatDate } from "@angular/common";
   ],
 })
 export class DataTableComponent implements OnInit {
-  constructor(private dataTableService: DataTableService) {}
+  constructor(
+    private dataTableService: DataTableService,
+    private _snackBar: MatSnackBar
+  ) {}
   @ViewChild('mainTable') mainTable: MatTable<FinancialData> | undefined;
-  @ViewChildren('subTables') subTables: QueryList<MatTable<FinancialData>> | undefined;
+  @ViewChildren('subTables') subTables:
+    | QueryList<MatTable<FinancialData>>
+    | undefined;
   mainDataSource: any[] = [];
   subDataSource: FinancialData[] = [];
   expandedElement: FinancialData | null | undefined;
@@ -80,7 +92,8 @@ export class DataTableComponent implements OnInit {
       columnDef: 'open price',
       header: 'Open Price',
       cell: (element: any) => {
-        const averageOpenPrice = this.calculateSum(element, 'open price') / element.details.length;
+        const averageOpenPrice =
+          this.calculateSum(element, 'open price') / element.details.length;
         return averageOpenPrice.toFixed(4);
       },
     },
@@ -93,7 +106,8 @@ export class DataTableComponent implements OnInit {
       columnDef: 'profit',
       header: 'Profit',
       cell: (element: any) => {
-        const averageProfit = this.calculateSum(element, 'profit') / element.details.length;
+        const averageProfit =
+          this.calculateSum(element, 'profit') / element.details.length;
         return averageProfit.toFixed(4);
       },
     },
@@ -138,8 +152,12 @@ export class DataTableComponent implements OnInit {
       columnDef: 'open time',
       header: 'Open Time',
       cell: (element: FinancialData) => {
-        const formattedDate = formatDate(element.openTime, 'dd.MM.yyyy hh:mm:ss', 'pl_PL');
-        return formattedDate
+        const formattedDate = formatDate(
+          element.openTime,
+          'dd.MM.yyyy hh:mm:ss',
+          'pl_PL'
+        );
+        return formattedDate;
       },
     },
     {
@@ -207,7 +225,6 @@ export class DataTableComponent implements OnInit {
           this.newArr.push(newObj);
           this.mainDataSource = this.newArr;
           this.subDataSource = newObj!.details;
-          
         })
       )
       .subscribe();
@@ -272,16 +289,29 @@ export class DataTableComponent implements OnInit {
     return sum;
   }
 
-  removeMainDataRow(id: number) {
-    this.mainDataSource.splice(this.mainDataSource.map(item => item.id).indexOf(id), 1);
+  removeMainDataRow(row: any) {
+    const ids = row.details.map((detail: FinancialData) => detail.id);
+    this.mainDataSource.splice(
+      this.mainDataSource.map((item) => item.id).indexOf(row.id),
+      1
+    );
     this.mainTable!.renderRows();
+    this.openSnackBar(ids.toString());
   }
 
   removeSubDataRow(id: number, element: any, row: any) {
-    element.details.splice(element.details.map((item: any) => item.id).indexOf(id), 1);
-    this.subTables?.forEach(table => table.renderRows());
+    element.details.splice(
+      element.details.map((item: any) => item.id).indexOf(id),
+      1
+    );
+    this.subTables?.forEach((table) => table.renderRows());
     if (!element.details.length) {
-      this.removeMainDataRow(element.id)
+      this.removeMainDataRow(element);
     }
+    this.openSnackBar(row.id);
+  }
+
+  openSnackBar(ids: string) {
+    this._snackBar.open(`Zamknięto zlecenie: ${ids}`, 'Ok', { duration: 5000 });
   }
 }
