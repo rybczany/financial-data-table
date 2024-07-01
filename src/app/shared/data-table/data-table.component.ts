@@ -18,7 +18,7 @@ import {
 import { FinancialData } from './financial-data';
 import { DataTableService } from '../../services/api/data-table.service';
 import { groupBy, map, mergeMap, tap, toArray } from 'rxjs/operators';
-import { formatDate } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 //---------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
   selector: 'data-table',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule, MatIconModule],
+  imports: [MatTableModule, MatButtonModule, MatIconModule, CommonModule],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
   animations: [
@@ -313,5 +313,9 @@ export class DataTableComponent implements OnInit {
 
   openSnackBar(ids: string) {
     this._snackBar.open(`Zamknięto zlecenie: ${ids}`, 'Ok', { duration: 5000 });
+  }
+
+  convertStringToNumber(data: string): number {
+    return Number(data);
   }
 }

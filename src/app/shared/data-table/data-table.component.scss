@@ -70,3 +70,24 @@ tr.example-element-row:not(.example-expanded-row):active {
 .mat-column-expandedDetail {
   padding: 0;
 }
+
+.mat-column-profit span {
+
+  &.plus {
+    color: rgb(60, 193, 149); 
+  }
+
+  &.minus {
+    color: rgb(249,76, 76); 
+  }
+}
+
+.mat-mdc-row,
+.mat-mdc-header-row {
+  background-color: rgb(220, 225, 229);
+}
+
+tr.example-element-row:not(.example-expanded-row):hover,
+.mat-mdc-row:hover {
+  background-color: rgb(201, 209, 216);
+}
