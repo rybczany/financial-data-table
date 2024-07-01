@@ -50,7 +50,7 @@ export class DataTableComponent implements OnInit {
   @ViewChildren('subTables') subTables:
     | QueryList<MatTable<FinancialDataDetail>>
     | undefined;
-  mainDataSource: any[] = [];
+  mainDataSource: FinancialData[] = [];
   subDataSource: FinancialDataDetail[] = [];
   expandedElement: FinancialDataDetail | null | undefined;
   mainColumns = [
@@ -94,7 +94,7 @@ export class DataTableComponent implements OnInit {
       header: 'Open Price',
       cell: (element: any) => {
         const averageOpenPrice =
-          this.calculateSum(element, 'open price') / element.details.length;
+          this.getSum(element, 'open price') / element.details.length;
         return averageOpenPrice.toFixed(4);
       },
     },
@@ -108,7 +108,7 @@ export class DataTableComponent implements OnInit {
       header: 'Profit',
       cell: (element: any) => {
         const averageProfit =
-          this.calculateSum(element, 'profit') / element.details.length;
+          this.getSum(element, 'profit') / element.details.length;
         return averageProfit.toFixed(4);
       },
     },
@@ -176,7 +176,7 @@ export class DataTableComponent implements OnInit {
       columnDef: 'profit',
       header: 'Profit',
       cell: (element: FinancialDataDetail) => {
-        const profit = this.calculateProfit(
+        const profit = this.getProfit(
           element.closePrice,
           element.openPrice,
           element.symbol,
@@ -237,63 +237,25 @@ export class DataTableComponent implements OnInit {
       .subscribe();
   }
 
-  calculateMultiplier(symbol: string): number {
-    let multiplier: number = 0;
-    switch (symbol) {
-      case 'BTCUSD':
-        multiplier = 2;
-        break;
-      case 'ETHUSD':
-        multiplier = 3;
-        break;
-      default:
-        multiplier = 1;
-    }
-    return multiplier;
+  getMultiplier(symbol: string): number {
+    return this.dataTableService.calculateMultiplier(symbol);
   }
 
-  calculateSideMultiplier(side: string): number {
-    let sideMultiplier: number = 0;
-    switch (side) {
-      case 'BUY':
-        sideMultiplier = 1;
-        break;
-      default:
-        sideMultiplier = -1;
-    }
-    return sideMultiplier;
+  getSideMultiplier(side: string): number {
+    return this.dataTableService.calculateSideMultiplier(side);
   }
 
-  calculateProfit(
+  getProfit(
     closePrice: number,
     openPrice: number,
     symbol: string,
     side: string
   ): number {
-    const calculatedProfit =
-      ((closePrice - openPrice) *
-        this.calculateMultiplier(symbol) *
-        this.calculateSideMultiplier(side)) /
-      100;
-    return calculatedProfit;
+    return this.dataTableService.calculateProfit(closePrice, openPrice, symbol, side);
   }
 
-  calculateSum(element: any, title: string): number {
-    let sum: number = 0;
-    element.details.forEach((detail: FinancialDataDetail) => {
-      if (title === 'profit') {
-        const calculatedProfit = this.calculateProfit(
-          detail.closePrice,
-          detail.openPrice,
-          detail.symbol,
-          detail.side
-        );
-        sum += calculatedProfit;
-      } else {
-        sum += detail.openPrice;
-      }
-    });
-    return sum;
+  getSum(element: FinancialDataDetail, title: string): number {
+    return this.dataTableService.calculateSum(element, title);
   }
 
   removeMainDataRow(row: FinancialData) {
