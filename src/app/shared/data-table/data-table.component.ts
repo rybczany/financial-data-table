@@ -62,7 +62,7 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'symbol',
       header: 'Symbol',
-      cell: (element: FinancialDataDetail) => `${element.symbol}`,
+      cell: (element: FinancialData) => `${element.symbol}`,
     },
     {
       columnDef: 'symbol details length',
@@ -82,7 +82,11 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'size',
       header: 'Size',
-      cell: (element: FinancialDataDetail) => `${element.size}`,
+      cell: (element: FinancialData) => {
+        let size: number = 0;
+        element.details!.forEach(detail => size += detail.size);
+        return `${size.toFixed(2)}`
+      },
     },
     {
       columnDef: 'open time',
@@ -101,7 +105,11 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'swap',
       header: 'Swap',
-      cell: (element: FinancialDataDetail) => `${element.swap}`,
+      cell: (element: FinancialData) => {
+        let swap: number = 0;
+        element.details!.forEach(detail => swap += detail.swap);
+        return `${swap.toFixed(2)}`
+      },
     },
     {
       columnDef: 'profit',
