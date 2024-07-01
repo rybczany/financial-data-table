@@ -15,7 +15,7 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { FinancialData } from './financial-data';
+import { FinancialData, FinancialDataDetail } from './financial-data';
 import { DataTableService } from '../../services/api/data-table.service';
 import { groupBy, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CommonModule, formatDate } from '@angular/common';
@@ -45,13 +45,13 @@ export class DataTableComponent implements OnInit {
     private dataTableService: DataTableService,
     private _snackBar: MatSnackBar
   ) {}
-  @ViewChild('mainTable') mainTable: MatTable<FinancialData> | undefined;
+  @ViewChild('mainTable') mainTable: MatTable<FinancialDataDetail> | undefined;
   @ViewChildren('subTables') subTables:
-    | QueryList<MatTable<FinancialData>>
+    | QueryList<MatTable<FinancialDataDetail>>
     | undefined;
   mainDataSource: any[] = [];
-  subDataSource: FinancialData[] = [];
-  expandedElement: FinancialData | null | undefined;
+  subDataSource: FinancialDataDetail[] = [];
+  expandedElement: FinancialDataDetail | null | undefined;
   mainColumns = [
     {
       columnDef: 'expand',
@@ -61,7 +61,7 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'symbol',
       header: 'Symbol',
-      cell: (element: FinancialData) => `${element.symbol}`,
+      cell: (element: FinancialDataDetail) => `${element.symbol}`,
     },
     {
       columnDef: 'symbol details length',
@@ -81,7 +81,7 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'size',
       header: 'Size',
-      cell: (element: FinancialData) => `${element.size}`,
+      cell: (element: FinancialDataDetail) => `${element.size}`,
     },
     {
       columnDef: 'open time',
@@ -100,7 +100,7 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'swap',
       header: 'Swap',
-      cell: (element: FinancialData) => `${element.swap}`,
+      cell: (element: FinancialDataDetail) => `${element.swap}`,
     },
     {
       columnDef: 'profit',
@@ -136,22 +136,22 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'order id',
       header: 'Order ID',
-      cell: (element: FinancialData) => `${element.id}`,
+      cell: (element: FinancialDataDetail) => `${element.id}`,
     },
     {
       columnDef: 'side',
       header: 'Side',
-      cell: (element: FinancialData) => `${element.side}`,
+      cell: (element: FinancialDataDetail) => `${element.side}`,
     },
     {
       columnDef: 'size',
       header: 'Size',
-      cell: (element: FinancialData) => `${element.size}`,
+      cell: (element: FinancialDataDetail) => `${element.size}`,
     },
     {
       columnDef: 'open time',
       header: 'Open Time',
-      cell: (element: FinancialData) => {
+      cell: (element: FinancialDataDetail) => {
         const formattedDate = formatDate(
           element.openTime,
           'dd.MM.yyyy hh:mm:ss',
@@ -163,18 +163,18 @@ export class DataTableComponent implements OnInit {
     {
       columnDef: 'open price',
       header: 'Open Price',
-      cell: (element: FinancialData) => `${element.openPrice}`,
+      cell: (element: FinancialDataDetail) => `${element.openPrice}`,
     },
     {
       columnDef: 'swap',
       header: 'Swap',
-      cell: (element: FinancialData) => `${element.swap}`,
+      cell: (element: FinancialDataDetail) => `${element.swap}`,
     },
 
     {
       columnDef: 'profit',
       header: 'Profit',
-      cell: (element: FinancialData) => {
+      cell: (element: FinancialDataDetail) => {
         const profit = this.calculateProfit(
           element.closePrice,
           element.openPrice,
@@ -192,7 +192,7 @@ export class DataTableComponent implements OnInit {
   ];
   displayedMainColumns = this.mainColumns.map((c) => c.columnDef);
   displayedSubColumns = this.subColumns.map((c) => c.columnDef);
-  newArr: any[] = [];
+  newArr: FinancialData[] = [];
   symbol: string = '';
   size: number = 0;
   openPrice: number = 0;
@@ -209,7 +209,13 @@ export class DataTableComponent implements OnInit {
           return group.pipe(toArray());
         }),
         tap((res) => {
-          let newObj;
+          let newObj: FinancialData = {
+            id: undefined,
+            symbol: undefined,
+            size: undefined,
+            swap: undefined,
+            details: undefined,
+          };
           let id: number = 0;
           let size: number = 0;
           let swap: number = 0;
@@ -224,7 +230,7 @@ export class DataTableComponent implements OnInit {
           });
           this.newArr.push(newObj);
           this.mainDataSource = this.newArr;
-          this.subDataSource = newObj!.details;
+          this.subDataSource = newObj.details!;
         })
       )
       .subscribe();
@@ -273,7 +279,7 @@ export class DataTableComponent implements OnInit {
 
   calculateSum(element: any, title: string): number {
     let sum: number = 0;
-    element.details.forEach((detail: FinancialData) => {
+    element.details.forEach((detail: FinancialDataDetail) => {
       if (title === 'profit') {
         const calculatedProfit = this.calculateProfit(
           detail.closePrice,
@@ -289,8 +295,8 @@ export class DataTableComponent implements OnInit {
     return sum;
   }
 
-  removeMainDataRow(row: any) {
-    const ids = row.details.map((detail: FinancialData) => detail.id);
+  removeMainDataRow(row: FinancialData) {
+    const ids = row.details!.map((detail: FinancialDataDetail) => detail.id);
     this.mainDataSource.splice(
       this.mainDataSource.map((item) => item.id).indexOf(row.id),
       1
@@ -299,16 +305,16 @@ export class DataTableComponent implements OnInit {
     this.openSnackBar(ids.toString());
   }
 
-  removeSubDataRow(id: number, element: any, row: any) {
-    element.details.splice(
-      element.details.map((item: any) => item.id).indexOf(id),
+  removeSubDataRow(id: number, element: FinancialData, row: FinancialDataDetail) {
+    element.details!.splice(
+      element.details!.map((item: FinancialDataDetail) => item.id).indexOf(id),
       1
     );
     this.subTables?.forEach((table) => table.renderRows());
-    if (!element.details.length) {
+    if (!element.details!.length) {
       this.removeMainDataRow(element);
     }
-    this.openSnackBar(row.id);
+    this.openSnackBar(row.id.toString());
   }
 
   openSnackBar(ids: string) {
