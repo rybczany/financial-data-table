@@ -20,6 +20,7 @@ import { DataTableService } from '../../services/api/data-table.service';
 import { groupBy, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CommonModule, formatDate } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { convertStringToNumber, handleSnackBar } from '../../utils/utils';
 
 //---------------------------------------------------------------------------------
 
@@ -318,10 +319,10 @@ export class DataTableComponent implements OnInit {
   }
 
   openSnackBar(ids: string) {
-    this._snackBar.open(`Zamknięto zlecenie: ${ids}`, 'Ok', { duration: 5000 });
+    handleSnackBar(this._snackBar, ids);
   }
 
-  convertStringToNumber(data: string): number {
-    return Number(data);
+  strToNo(data: string): number {
+    return convertStringToNumber(data);
   }
 }

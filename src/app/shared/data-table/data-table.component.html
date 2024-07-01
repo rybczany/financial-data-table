@@ -4,7 +4,7 @@
         <th mat-header-cell *matHeaderCellDef> {{mainColumn.header}} </th>
         <td mat-cell *matCellDef="let row">
             @if (mainColumn.columnDef === 'profit') {
-            <span [ngClass]="convertStringToNumber(mainColumn.cell(row)) > 0 ? 'plus' : 'minus'">{{mainColumn.cell(row)}}</span>
+            <span [ngClass]="strToNo(mainColumn.cell(row)) > 0 ? 'plus' : 'minus'">{{mainColumn.cell(row)}}</span>
             } @else {
             <span>
                 @if (mainColumn.columnDef === 'expand') {
@@ -39,7 +39,7 @@
                         <td mat-cell *matCellDef="let row">
                             @if (subColumn.columnDef === 'profit') {
                             <span
-                                [ngClass]="convertStringToNumber(subColumn.cell(row)) > 0 ? 'plus' : 'minus'">{{subColumn.cell(row)}}</span>
+                                [ngClass]="strToNo(subColumn.cell(row)) > 0 ? 'plus' : 'minus'">{{subColumn.cell(row)}}</span>
                             } @else {
                             @if (subColumn.columnDef === 'remove') {
                             <button mat-icon-button aria-label="remove row"
